@@ -1,18 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Mic2, ListMusic, PictureInPicture2, Volume, Volume1, Volume2, VolumeX, Maximize2, X, ChevronDown, ListPlus, Trash2 } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Mic2, ListMusic, Volume, Volume1, Volume2, VolumeX, Maximize2, X, ChevronDown, ListPlus, Trash2 } from 'lucide-react';
 import { useMusic } from '../contexts/MusicContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { apiClient } from '../config/api';
 import { SecureImage, useSecureAsset } from './SecureAsset';
-import { Badge } from '@/components/ui/badge';
 
 
 export default function GlobalBottomPlayer() {
-    const { activeTrack: track, userQueue, clearQueue, removeFromQueue, nextTrack, prevTrack, toastMessage, musicDatabase, autoplayToken } = useMusic();
+    const { activeTrack: track, userQueue, clearQueue, removeFromQueue, nextTrack, prevTrack, toastMessage, autoplayToken } = useMusic();
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const lyricRefs = useRef<(HTMLParagraphElement | null)[]>([]);
-    
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -28,7 +27,6 @@ export default function GlobalBottomPlayer() {
 
     // Panel States
     const [showQueue, setShowQueue] = useState(false);
-    const [isMiniplayer, setIsMiniplayer] = useState(false);
     const [isDraggingVolume, setIsDraggingVolume] = useState(false);
     const [isDraggingTime, setIsDraggingTime] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
@@ -112,28 +110,34 @@ export default function GlobalBottomPlayer() {
     // Auto-scroll lyrics
     useEffect(() => {
         if (currentLyricIndex !== -1 && lyricRefs.current[currentLyricIndex] && (isExpanded || showLyrics)) {
-                lyricRefs.current[currentLyricIndex]?.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
+            lyricRefs.current[currentLyricIndex]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
         }
     }, [currentLyricIndex, isExpanded, showLyrics]);
 
     // Auto-play when user explicitly picks a track (autoplayToken > 0 = user action, not session restore)
     useEffect(() => {
-        if (!track || autoplayToken === 0) return;
+        if (!track || autoplayToken === 0 || !secureAudioSrc) return;
 
         setIsPlaying(true);
         const timer = setTimeout(() => {
-            audioRef.current?.play().catch(console.error);
-        }, 50);
+            if (audioRef.current && audioRef.current.src) {
+                audioRef.current.play().catch(e => {
+                    if (e.name !== 'AbortError' && e.name !== 'NotSupportedError') {
+                        console.error('Autoplay failed:', e);
+                    }
+                });
+            }
+        }, 80);
         return () => clearTimeout(timer);
-    }, [autoplayToken]);
+    }, [autoplayToken, secureAudioSrc, track]);
 
     if (!track) return null;
 
     const togglePlay = async () => {
-        if (!audioRef.current) return;
+        if (!audioRef.current || !secureAudioSrc) return;
         if (isPlaying) {
             audioRef.current.pause();
             setIsPlaying(false);
@@ -142,7 +146,9 @@ export default function GlobalBottomPlayer() {
                 await audioRef.current.play();
                 setIsPlaying(true);
             } catch (e) {
-                console.error('Playback failed:', e);
+                if ((e as Error).name !== 'AbortError') {
+                    console.error('Playback failed:', e);
+                }
                 setIsPlaying(false);
             }
         }
@@ -193,11 +199,6 @@ export default function GlobalBottomPlayer() {
         return <Volume2 className="w-5 h-5" />;
     };
 
-    // Calculate queue logic
-    const currentIdx = musicDatabase.findIndex(t => t.url === track.url);
-    const nextIdx = (currentIdx + 1) % musicDatabase.length;
-    const queuedTrack = musicDatabase[nextIdx];
-
 
     return (
         <div className={`fixed bottom-0 left-0 right-0 z-[1000] transition-all duration-700 ease-[cubic-bezier(0.19,1,0.22,1)] ${isExpanded ? 'h-full bg-black' : 'h-24 bg-black/80 backdrop-blur-2xl border-t border-white/5'}`}>
@@ -230,7 +231,7 @@ export default function GlobalBottomPlayer() {
                             <div className={`w-full md:w-[35%] lg:w-[30%] flex flex-col px-8 py-6 items-center justify-start md:justify-center gap-6 md:gap-8 ${showLyrics ? 'hidden md:flex' : 'flex'}`}>
                                 <div className="w-full aspect-square max-w-[350px] rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative group shrink-0">
                                     <SecureImage path={track.thumbnail} alt="Artwork" className={`w-full h-full object-cover transition-transform duration-[2000ms] ${isPlaying ? 'scale-110 rotate-1' : 'scale-100'}`} />
-                                    
+
                                     {/* distributed corner Metadata stickers */}
                                     <div className="absolute inset-0 p-4 pointer-events-none transition-all duration-700">
                                         {/* Top Left: Genre */}
@@ -303,13 +304,13 @@ export default function GlobalBottomPlayer() {
                                         <Shuffle className="w-5 md:w-6 h-5 md:h-6" />
                                     </button>
                                     <button onClick={() => prevTrack(isShuffle)} className="text-white hover:text-red-500 transition-all p-3">
-                                        <SkipBack className="w-8 md:w-9 h-8 md:h-8 fill-current" />
+                                        <SkipBack className="w-8 md:w-8 h-8 md:h-8 fill-current" />
                                     </button>
                                     <button onClick={togglePlay} className="w-16 md:w-20 h-16 md:h-20 bg-white hover:bg-red-500 text-black hover:text-white rounded-full flex items-center justify-center transition-all shadow-[0_15px_40px_rgba(255,255,255,0.1)] active:scale-95 group">
                                         {isPlaying ? <Pause className="w-8 md:w-10 h-8 md:h-10 fill-current" /> : <Play className="w-8 md:w-10 h-8 md:h-10 fill-current ml-2" />}
                                     </button>
                                     <button onClick={() => nextTrack(isShuffle)} className="text-white hover:text-red-500 transition-all p-3">
-                                        <SkipForward className="w-8 md:w-9 h-8 md:h-8 fill-current" />
+                                        <SkipForward className="w-8 md:w-8 h-8 md:h-8 fill-current" />
                                     </button>
                                     <button onClick={() => setIsRepeat(!isRepeat)} className={`p-3 rounded-full transition-all ${isRepeat ? 'text-red-500 bg-red-500/10' : 'text-white/40 hover:text-white'}`}>
                                         <Repeat className="w-5 md:w-6 h-5 md:h-6" />
@@ -322,7 +323,7 @@ export default function GlobalBottomPlayer() {
                                 {lyricsData.map((lyric, index) => {
                                     const isCurrent = index === currentLyricIndex;
                                     const isPassed = index < currentLyricIndex;
-                                    
+
                                     return (
                                         <p
                                             key={index}
@@ -363,7 +364,7 @@ export default function GlobalBottomPlayer() {
                 {/* Audio Engine */}
                 <audio
                     ref={audioRef}
-                    src={secureAudioSrc}
+                    src={secureAudioSrc || undefined}
                     onTimeUpdate={() => audioRef.current && setCurrentTime(audioRef.current.currentTime)}
                     onLoadedMetadata={() => audioRef.current && setDuration(audioRef.current.duration)}
                     onEnded={() => isRepeat ? (audioRef.current && (audioRef.current.currentTime = 0, audioRef.current.play())) : nextTrack(isShuffle)}
