@@ -1,6 +1,7 @@
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { musicDatabase } from './seeder.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,31 +24,16 @@ export interface SongData {
     bpm?: number;
 }
 
-const musicDatabase: SongData[] = [
-    
-    {
-        id: "nae-9",
-        title: "Cyberpunk NAE",
-        artist: "NAE Synth",
-        publisher: "NAE Studio",
-        album: "Neon Future",
-        genre: "Synthwave",
-        thumbnail: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=2070",
-        url: "sample.mp3",
-        lyric: "sample.lrc",
-        year: 2026,
-        duration: "03:50",
-        bpm: 110
-    },
-    
-];
-
 export function initDb() {
     db.serialize(() => {
-        // Automatically refresh database structure and data during dev
-        db.run("DROP TABLE IF EXISTS songs");
+        const isProd = process.env.NODE_ENV === 'production';
+
+        if (!isProd) {
+            // Force refresh database structure and data during dev
+            db.run("DROP TABLE IF EXISTS songs");
+        }
         
-        db.run(`CREATE TABLE songs (
+        db.run(`CREATE TABLE IF NOT EXISTS songs (
             id TEXT PRIMARY KEY,
             title TEXT,
             artist TEXT,
@@ -60,28 +46,35 @@ export function initDb() {
             year INTEGER,
             duration TEXT,
             bpm INTEGER
-        )`);
-
-        console.log("Seeding fresh music database...");
-        const stmt = db.prepare("INSERT INTO songs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        for (const song of musicDatabase) {
-            stmt.run(
-                song.id,
-                song.title,
-                song.artist,
-                song.publisher,
-                song.album,
-                song.genre,
-                song.thumbnail,
-                song.url,
-                song.lyric,
-                song.year || null,
-                song.duration || null,
-                song.bpm || null
-            );
-        }
-        stmt.finalize();
-        console.log("Seeding completed.");
+        )`, () => {
+            // Ensure we never overwrite a database that already has data in production
+            db.get("SELECT COUNT(*) AS count FROM songs", (err, row: { count: number }) => {
+                if (!err && row && row.count === 0) {
+                    console.log("Database empty. Seeding fresh music database...");
+                    const stmt = db.prepare("INSERT INTO songs VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                    for (const song of musicDatabase) {
+                        stmt.run(
+                            song.id,
+                            song.title,
+                            song.artist,
+                            song.publisher,
+                            song.album,
+                            song.genre,
+                            song.thumbnail,
+                            song.url,
+                            song.lyric,
+                            song.year || null,
+                            song.duration || null,
+                            song.bpm || null
+                        );
+                    }
+                    stmt.finalize();
+                    console.log("Seeding completed.");
+                } else if (!err) {
+                    console.log(`Database check passed. Preserved ${row.count} existing songs. Skipped seeding.`);
+                }
+            });
+        });
     });
 }
 

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { apiClient } from '../config/api';
 import type { SongData, PaginatedSongs } from '../types/musicData';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -27,7 +27,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     // localStorage: persists across sessions (user preferences)
     const [userQueue, setUserQueue] = useLocalStorage<SongData[]>('nae-user-queue', []);
     const [toastMessage, setToastMessage] = useState('');
-    
+
     // Persistent fallback playlist
     const [musicDatabase, setMusicDatabase] = useState<SongData[]>([]);
     const [playlistMeta, setPlaylistMeta] = useState({ page: 1, totalPages: 1, search: '', limit: 8 });
@@ -92,8 +92,8 @@ export function MusicProvider({ children }: { children: ReactNode }) {
                         // Standard Unfiltered Sequential playback — grab the next exact chunk.
                         const nextPage = playlistMeta.page < playlistMeta.totalPages ? playlistMeta.page + 1 : 1;
                         try {
-                            const res = await apiClient.get<PaginatedSongs>('/api/songs', { 
-                                params: { page: nextPage, limit: playlistMeta.limit } 
+                            const res = await apiClient.get<PaginatedSongs>('/api/songs', {
+                                params: { page: nextPage, limit: playlistMeta.limit }
                             });
                             setMusicDatabase(res.data.songs);
                             setPlaylistMeta(prev => ({ ...prev, page: nextPage }));
