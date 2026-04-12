@@ -65,7 +65,7 @@ export default function MusicPage() {
     // when the user explicitly clicks a song from this page. This allows the background
     // player to seamlessly fetch next pages without affecting what the user is currently looking at!
     const handlePlayFromPage = (track: SongData) => {
-        setContextPlaylist(songs, currentPage, totalPages, searchQuery);
+        setContextPlaylist(songs, currentPage, totalPages, searchQuery, ITEMS_PER_PAGE);
         playTrack(track);
     };
 

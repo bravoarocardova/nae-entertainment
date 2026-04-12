@@ -15,8 +15,8 @@ interface MusicContextType {
     clearQueue: () => void;
     nextTrack: (isShuffle: boolean) => Promise<void>;
     prevTrack: (isShuffle: boolean) => Promise<void>;
-    setContextPlaylist: (songs: SongData[], page: number, totalPages: number, search: string) => void;
-    playlistMeta: { page: number; totalPages: number; search: string };
+    setContextPlaylist: (songs: SongData[], page: number, totalPages: number, search: string, limit: number) => void;
+    playlistMeta: { page: number; totalPages: number; search: string; limit: number };
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -30,12 +30,12 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     
     // Persistent fallback playlist
     const [musicDatabase, setMusicDatabase] = useState<SongData[]>([]);
-    const [playlistMeta, setPlaylistMeta] = useState({ page: 1, totalPages: 1, search: '' });
+    const [playlistMeta, setPlaylistMeta] = useState({ page: 1, totalPages: 1, search: '', limit: 8 });
     const [autoplayToken, setAutoplayToken] = useState(0);
 
-    const setContextPlaylist = (songs: SongData[], page: number, totalPages: number, search: string) => {
+    const setContextPlaylist = (songs: SongData[], page: number, totalPages: number, search: string, limit: number) => {
         setMusicDatabase(songs);
-        setPlaylistMeta({ page, totalPages, search });
+        setPlaylistMeta({ page, totalPages, search, limit });
     };
 
     const bumpAutoplay = () => setAutoplayToken(t => t + 1);
@@ -93,7 +93,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
                         const nextPage = playlistMeta.page < playlistMeta.totalPages ? playlistMeta.page + 1 : 1;
                         try {
                             const res = await apiClient.get<PaginatedSongs>('/api/songs', { 
-                                params: { page: nextPage, limit: 8 } 
+                                params: { page: nextPage, limit: playlistMeta.limit } 
                             });
                             setMusicDatabase(res.data.songs);
                             setPlaylistMeta(prev => ({ ...prev, page: nextPage }));
