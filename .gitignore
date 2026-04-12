@@ -28,6 +28,10 @@ be/music.db
 *.db
 *.sqlite
 
+# File Backend
+be/public/lyrics
+be/public/tracks
+be/public/thumbnails
 
 # IDE
 .vscode/

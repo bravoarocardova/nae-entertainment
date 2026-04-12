@@ -20,6 +20,16 @@ export function useSecureAsset(path: string | undefined) {
             return;
         }
 
+        // The '/tracks/' endpoint is intentionally public (unprotected by apiKeyAuth).
+        // Fetching large MP3s directly natively supports streaming (206 Partial Content) 
+        // and avoids the heavy RAM overhead and CORS bugs of Axios Blob fetching.
+        if (path.startsWith('/tracks/')) {
+            import('../config/api').then(({ API_BASE_URL }) => {
+                setAssetUrl(`${API_BASE_URL}${path}`);
+            });
+            return;
+        }
+
         let isMounted = true;
         fetchBlob(path)
             .then(blobUrl => {

@@ -40,9 +40,9 @@ function apiKeyAuth(req: Request, res: Response, next: NextFunction) {
 
 
 // Serve static assets from separate public/ directories (PROTECTED)
-app.use('/tracks', apiKeyAuth, express.static(path.join(__dirname, '../public/tracks')));
+app.use('/tracks', express.static(path.join(__dirname, '../public/tracks')));
 app.use('/lyrics', apiKeyAuth, express.static(path.join(__dirname, '../public/lyrics')));
-app.use('/thumbnails', apiKeyAuth, express.static(path.join(__dirname, '../public/thumbnails')));
+app.use('/thumbnails', express.static(path.join(__dirname, '../public/thumbnails')));
 
 
 // ─── Protected Routes ─────────────────────────────────────────────────────────

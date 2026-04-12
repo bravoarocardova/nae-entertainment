@@ -17,12 +17,12 @@ interface PaginatedSongs {
 
 export default function MusicPage() {
     const { t } = useTranslation();
-    const { playTrack, addToQueue } = useMusic();
+    const { playTrack, addToQueue, setContextPlaylist } = useMusic();
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [paginatedData, setPaginatedData] = useState<PaginatedSongs | null>(null);
     const [loading, setLoading] = useState(true);
-    const ITEMS_PER_PAGE = 10;
+    const ITEMS_PER_PAGE = 8;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,6 +60,14 @@ export default function MusicPage() {
     const songs = paginatedData?.songs || [];
     const totalPages = paginatedData?.totalPages || 0;
     const totalItems = paginatedData?.total || 0;
+
+    // Only synchronizes the background player's playlist map with the active visual page
+    // when the user explicitly clicks a song from this page. This allows the background
+    // player to seamlessly fetch next pages without affecting what the user is currently looking at!
+    const handlePlayFromPage = (track: SongData) => {
+        setContextPlaylist(songs, currentPage, totalPages, searchQuery);
+        playTrack(track);
+    };
 
     return (
         <div className="min-h-screen bg-background pt-32 pb-40 px-6 md:px-12">
@@ -102,7 +110,7 @@ export default function MusicPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 min-h-[400px] content-start">
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4 md:gap-8 min-h-[400px] content-start">
                             {songs.map((track) => (
                                 <div key={track.id} className="group relative bg-card/40 rounded-3xl p-4 border border-border hover:border-red-600/30 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(220,38,38,0.15)] flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
                                     <div className="relative aspect-square rounded-2xl overflow-hidden mb-5 shadow-2xl">
@@ -131,7 +139,7 @@ export default function MusicPage() {
                                         {/* Hover Play Overlay */}
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px]">
                                             <button
-                                                onClick={() => playTrack(track)}
+                                                onClick={() => handlePlayFromPage(track)}
                                                 className="w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center transform scale-90 group-hover:scale-100 transition-all duration-500 hover:bg-red-700 active:scale-90 shadow-2xl"
                                             >
                                                 <Play className="w-6 h-6 fill-current" />

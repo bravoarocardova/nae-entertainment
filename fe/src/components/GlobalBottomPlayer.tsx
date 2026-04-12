@@ -373,11 +373,11 @@ export default function GlobalBottomPlayer() {
                 />
 
                 {/* Track Info & Expand Trigger */}
-                <div className="flex items-center gap-4 w-full md:w-[30%] cursor-pointer group" onClick={() => setIsExpanded(true)}>
+                <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0 md:flex-none md:w-[30%] cursor-pointer group" onClick={() => setIsExpanded(true)}>
                     <div className="relative w-12 h-12 md:w-16 md:h-16 shrink-0 rounded-lg overflow-hidden shadow-2xl border border-white/5">
                         <SecureImage path={track.thumbnail} alt="cover" className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'rotate-3 scale-110' : ''}`} />
                     </div>
-                    <div className="min-w-0 pr-4">
+                    <div className="min-w-0 pr-2 md:pr-4">
                         <h4 className="text-white font-black text-sm md:text-base truncate tracking-tight">{track.title}</h4>
                         <p className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-widest mt-0.5 truncate">{track.artist}</p>
                     </div>

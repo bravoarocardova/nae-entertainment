@@ -8,19 +8,15 @@ interface MusicContextType {
     userQueue: SongData[];
     toastMessage: string;
     musicDatabase: SongData[];
-    /** Monotonically-increasing counter. 0 = no user action yet. >0 = user explicitly picked a track. */
     autoplayToken: number;
-    // Pagination
-    currentPage: number;
-    totalPages: number;
-    isLoadingMusic: boolean;
-    setPage: (page: number) => void;
     playTrack: (track: SongData) => void;
     addToQueue: (track: SongData) => void;
     removeFromQueue: (index: number) => void;
     clearQueue: () => void;
     nextTrack: (isShuffle: boolean) => Promise<void>;
     prevTrack: (isShuffle: boolean) => Promise<void>;
+    setContextPlaylist: (songs: SongData[], page: number, totalPages: number, search: string) => void;
+    playlistMeta: { page: number; totalPages: number; search: string };
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -31,28 +27,15 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     // localStorage: persists across sessions (user preferences)
     const [userQueue, setUserQueue] = useLocalStorage<SongData[]>('nae-user-queue', []);
     const [toastMessage, setToastMessage] = useState('');
+    
+    // Persistent fallback playlist
     const [musicDatabase, setMusicDatabase] = useState<SongData[]>([]);
+    const [playlistMeta, setPlaylistMeta] = useState({ page: 1, totalPages: 1, search: '' });
     const [autoplayToken, setAutoplayToken] = useState(0);
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [isLoadingMusic, setIsLoadingMusic] = useState(false);
-    const PAGE_LIMIT = 8;
 
-    // Fetch paginated songs whenever page changes
-    useEffect(() => {
-        setIsLoadingMusic(true);
-        apiClient.get<PaginatedSongs>('/api/songs', { params: { page: currentPage, limit: PAGE_LIMIT } })
-            .then(res => {
-                setMusicDatabase(res.data.songs);
-                setTotalPages(res.data.totalPages);
-            })
-            .catch(err => console.error('Error fetching paginated songs:', err))
-            .finally(() => setIsLoadingMusic(false));
-    }, [currentPage]);
-
-    const setPage = (page: number) => {
-        setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    const setContextPlaylist = (songs: SongData[], page: number, totalPages: number, search: string) => {
+        setMusicDatabase(songs);
+        setPlaylistMeta({ page, totalPages, search });
     };
 
     const bumpAutoplay = () => setAutoplayToken(t => t + 1);
@@ -90,7 +73,39 @@ export function MusicProvider({ children }: { children: ReactNode }) {
                 }
             } else if (musicDatabase.length > 0) {
                 const currentIdx = musicDatabase.findIndex(t => t.url === activeTrack.url);
-                setActiveTrack(musicDatabase[(currentIdx + 1) % musicDatabase.length]);
+                if (currentIdx === musicDatabase.length - 1) {
+                    if (playlistMeta.search) {
+                        // The user finished pushing through a filtered Search list.
+                        // As requested, instead of dropping to Page 1 of the global list,
+                        // we automatically enter an infinite Random Radio mode by fetching a random track!
+                        try {
+                            const res = await apiClient.get<SongData>('/api/songs/random');
+                            // Replace the playlist entirely with this single random track to ensure
+                            // that when it ends, it hits this boundary condition again naturally.
+                            setMusicDatabase([res.data]);
+                            setActiveTrack(res.data);
+                        } catch (err) {
+                            console.error('Seamless random track failed:', err);
+                            setActiveTrack(musicDatabase[0]);
+                        }
+                    } else {
+                        // Standard Unfiltered Sequential playback — grab the next exact chunk.
+                        const nextPage = playlistMeta.page < playlistMeta.totalPages ? playlistMeta.page + 1 : 1;
+                        try {
+                            const res = await apiClient.get<PaginatedSongs>('/api/songs', { 
+                                params: { page: nextPage, limit: 8 } 
+                            });
+                            setMusicDatabase(res.data.songs);
+                            setPlaylistMeta(prev => ({ ...prev, page: nextPage }));
+                            setActiveTrack(res.data.songs[0]);
+                        } catch (err) {
+                            console.error('Seamless next page failed:', err);
+                            setActiveTrack(musicDatabase[0]); // fallback loops current
+                        }
+                    }
+                } else {
+                    setActiveTrack(musicDatabase[currentIdx + 1]);
+                }
             }
             bumpAutoplay();
         }
@@ -117,9 +132,8 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     return (
         <MusicContext.Provider value={{
             activeTrack, userQueue, toastMessage, musicDatabase,
-            autoplayToken,
-            currentPage, totalPages, isLoadingMusic, setPage,
-            playTrack, addToQueue, removeFromQueue, clearQueue, nextTrack, prevTrack,
+            autoplayToken, playlistMeta,
+            playTrack, addToQueue, removeFromQueue, clearQueue, nextTrack, prevTrack, setContextPlaylist
         }}>
             {children}
         </MusicContext.Provider>
