@@ -28,6 +28,7 @@ be/music.db
 *.db
 *.sqlite
 
+
 # IDE
 .vscode/
 .idea/
