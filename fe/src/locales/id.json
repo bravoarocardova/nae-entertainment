@@ -1,0 +1,80 @@
+{
+  "common": {
+    "loading": "Memuat...",
+    "search": "Cari lagu atau artis...",
+    "show": "Tampilkan",
+    "hide": "Sembunyikan",
+    "back": "Kembali"
+  },
+  "player": {
+    "playingFrom": "MEMUTAR DARI",
+    "queue": "Antrean",
+    "clearQueue": "Bersihkan",
+    "emptyQueue": "Antrean Anda kosong",
+    "addNext": "Tambah lagu untuk diputar selanjutnya",
+    "showLyrics": "Tampilkan Lirik",
+    "showControls": "Tampilkan Kontrol",
+    "label": "Label",
+    "bpm": "BPM"
+  },
+  "nav": {
+    "home": "Beranda",
+    "music": "Musik",
+    "videos": "Video",
+    "about": "Tentang",
+    "language": "Bahasa"
+  },
+  "music": {
+    "title": "Perpustakaan Musik",
+    "subtitle": "Temukan lagu-lagu terbaru dari NAE Entertainment",
+    "allSongs": "Semua Lagu",
+    "noTracks": "Lagu tidak ditemukan",
+    "pageOf": "Halaman {{current}} dari {{total}}"
+  },
+  "home": {
+    "hero": {
+      "title1": "KAMI MENCIPTAKAN",
+      "title2": "KEAJAIBAN",
+      "subtitle": "Membangun masa depan hiburan digital. Mewujudkan imajinasi menjadi mahakarya visual yang tak terlupakan.",
+      "cta1": "LIHAT KARYA KAMI",
+      "cta2": "KENALI TIM KAMI"
+    },
+    "about": {
+      "tag": "Tentang Kami",
+      "title1": "BUKAN SEKADAR",
+      "title2": "MAHAKARYA.",
+      "desc": "NAE Entertainment lahir dari gairah untuk menghadirkan konten digital berkualitas tinggi. Kami fokus pada narasi yang kuat, produksi yang detail, dan interaksi komunitas yang autentik di setiap bingkai.",
+      "followers": "Pengikut",
+      "views": "Tayangan"
+    },
+    "founders": {
+      "tag": "Kepemimpinan Kami",
+      "title1": "SUARA DI BALIK",
+      "title2": "VISI KAMI.",
+      "desc": "Kreativitas tanpa batas, didukung oleh tim yang berdedikasi tinggi untuk kualitas.",
+      "roles": {
+        "ceo": "CEO & Produser",
+        "creative": "Direktur Kreatif",
+        "technical": "Direktur Teknis"
+      },
+      "viewProfile": "Lihat Profil"
+    },
+    "cta": {
+      "tag": "BERGABUNGLAH",
+      "title1": "UKIR",
+      "title2": "SEJARAH.",
+      "desc": "Bergabunglah dengan jutaan fans lainnya. Subscribe ke channel YouTube kami sekarang untuk konten eksklusif.",
+      "subscribe": "SUBSCRIBE SEKARANG"
+    }
+  },
+  "videos": {
+    "title": "KONTEN KAMI",
+    "subtitle": "Lihat unggahan terbaru kami langsung dari Channel YouTube kami.",
+    "upcoming": "TAYANGAN MENDATANG",
+    "latest": "VIDEO TERBARU",
+    "premiering": "Segera Tayang",
+    "empty": "Belum ada video yang dipublikasikan.",
+    "errorApi": "Konfigurasi YouTube API Key atau Channel ID belum ditemukan di file .env",
+    "errorLoad": "Terjadi kesalahan saat memuat video."
+  }
+}

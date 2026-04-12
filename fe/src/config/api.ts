@@ -4,6 +4,22 @@ import axios from 'axios';
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 export const API_KEY = import.meta.env.VITE_API_KEY || '';
 
+// YouTube API Configuration
+export const YOUTUBE_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY || '';
+export const YOUTUBE_CHANNEL_ID = import.meta.env.VITE_YOUTUBE_CHANNEL_ID || '';
+
+/**
+ * Global API Endpoints Catalog
+ * This centralizes all URL strings for easy maintenance.
+ */
+export const ENDPOINTS = {
+    // Backend Internal Endpoints
+    SONGS: '/api/songs',
+    
+    // External Services
+    YOUTUBE_SEARCH: 'https://www.googleapis.com/youtube/v3/search',
+};
+
 export const getApiUrl = (endpoint: string) => {
     // If endpoint starts with a slash, just append it. Otherwise add a slash.
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

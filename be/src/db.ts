@@ -314,12 +314,27 @@ export interface PaginatedResult {
     totalPages: number;
 }
 
-export function getSongsPaginated(page: number, limit: number, callback: (err: Error | null, result: PaginatedResult | null) => void) {
+export function getSongsPaginated(page: number, limit: number, search: string | undefined, callback: (err: Error | null, result: PaginatedResult | null) => void) {
     const offset = (page - 1) * limit;
-    db.get("SELECT COUNT(*) AS total FROM songs", (err, countRow: { total: number }) => {
+    let countSql = "SELECT COUNT(*) AS total FROM songs";
+    let dataSql = "SELECT * FROM songs";
+    const params: any[] = [];
+
+    if (search) {
+        const searchPattern = `%${search}%`;
+        const whereClause = " WHERE title LIKE ? OR artist LIKE ? OR genre LIKE ?";
+        countSql += whereClause;
+        dataSql += whereClause;
+        params.push(searchPattern, searchPattern, searchPattern);
+    }
+
+    dataSql += " LIMIT ? OFFSET ?";
+    const dataParams = [...params, limit, offset];
+
+    db.get(countSql, params, (err, countRow: { total: number }) => {
         if (err) return callback(err, null);
         const total = countRow.total;
-        db.all("SELECT * FROM songs LIMIT ? OFFSET ?", [limit, offset], (err2, rows: SongData[]) => {
+        db.all(dataSql, dataParams, (err2, rows: SongData[]) => {
             if (err2) return callback(err2 as Error, null);
             const songs = rows.map(row => ({
                 ...row,

@@ -9,7 +9,6 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import VideoPage from './pages/VideoPage';
 import MusicPage from './pages/MusicPage';
-import MusicPlayerPage from './pages/MusicPlayerPage';
 
 function App() {
   useEffect(() => {
@@ -29,7 +28,6 @@ function App() {
               <Route path="video" element={<VideoPage />} />
               <Route path="music" element={<MusicPage />} />
             </Route>
-            <Route path="/music/play" element={<MusicPlayerPage />} />
           </Routes>
         </BrowserRouter>
       </MusicProvider>

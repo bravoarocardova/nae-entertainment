@@ -1,0 +1,80 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "search": "Search songs or artists...",
+    "show": "Show",
+    "hide": "Hide",
+    "back": "Back"
+  },
+  "player": {
+    "playingFrom": "PLAYING FROM",
+    "queue": "Queue",
+    "clearQueue": "Clear",
+    "emptyQueue": "Your queue is empty",
+    "addNext": "Add songs to play next",
+    "showLyrics": "Show Lyrics",
+    "showControls": "Show Controls",
+    "label": "Label",
+    "bpm": "BPM"
+  },
+  "nav": {
+    "home": "Home",
+    "music": "Music",
+    "videos": "Videos",
+    "about": "About",
+    "language": "Language"
+  },
+  "music": {
+    "title": "Music Library",
+    "subtitle": "Discover the latest tracks from NAE Entertainment",
+    "allSongs": "All Songs",
+    "noTracks": "No tracks found",
+    "pageOf": "Page {{current}} of {{total}}"
+  },
+  "home": {
+    "hero": {
+      "title1": "WE CREATE",
+      "title2": "MAGIC",
+      "subtitle": "Building the future of digital entertainment. Turning imagination into unforgettable visual masterpieces.",
+      "cta1": "SEE OUR WORK",
+      "cta2": "MEET THE TEAM"
+    },
+    "about": {
+      "tag": "About Us",
+      "title1": "NOT JUST",
+      "title2": "A MASTERPIECE.",
+      "desc": "NAE Entertainment was born from a passion for delivering high-quality digital content. We focus on strong narratives, detailed production, and authentic community interaction in every frame.",
+      "followers": "Followers",
+      "views": "Views"
+    },
+    "founders": {
+      "tag": "Our Leadership",
+      "title1": "THE VOICES BEHIND",
+      "title2": "THE VISION.",
+      "desc": "Limitless creativity, supported by a team highly dedicated to quality.",
+      "roles": {
+        "ceo": "CEO & Producer",
+        "creative": "Creative Director",
+        "technical": "Technical Director"
+      },
+      "viewProfile": "View Profile"
+    },
+    "cta": {
+      "tag": "JOIN THE MOVEMENT",
+      "title1": "MAKE",
+      "title2": "HISTORY.",
+      "desc": "Join millions of other fans. Subscribe to our YouTube channel now for exclusive content.",
+      "subscribe": "SUBSCRIBE NOW"
+    }
+  },
+  "videos": {
+    "title": "OUR CONTENT",
+    "subtitle": "Check out our latest uploads directly from our YouTube Channel.",
+    "upcoming": "UPCOMING PREMIERES",
+    "latest": "LATEST VIDEOS",
+    "premiering": "Premieres Soon",
+    "empty": "No videos published yet.",
+    "errorApi": "YouTube API Key or Channel ID configuration not found in .env file",
+    "errorLoad": "An error occurred while loading the video."
+  }
+}

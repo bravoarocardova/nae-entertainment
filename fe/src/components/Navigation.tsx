@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Youtube, Menu, X, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ModeToggle } from './mode-toggle';
+import { LanguageSelector } from './LanguageSelector';
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Navigation = () => {
+    const { t } = useTranslation();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
@@ -52,22 +55,23 @@ const Navigation = () => {
                     <div className="hidden md:flex items-center gap-10">
                         <div className="flex items-center gap-10 text-xs font-black uppercase tracking-[0.2em]">
                             <Link to="/" className={`transition-all duration-500 relative group/link ${location.pathname === '/' ? (isDarkOverHero ? 'text-white' : 'text-foreground') : 'text-muted-foreground hover:text-red-500'}`}>
-                                Home
+                                {t('nav.home')}
                                 <span className={`absolute -bottom-1 left-0 h-[2px] bg-red-600 transition-all duration-300 ${location.pathname === '/' ? 'w-full' : 'w-0 group-hover/link:w-full'}`}></span>
                             </Link>
                             <Link to="/video" className={`transition-all duration-500 relative group/link ${location.pathname === '/video' ? (isDarkOverHero ? 'text-white' : 'text-foreground') : 'text-muted-foreground hover:text-red-500'}`}>
-                                Videos
+                                {t('nav.videos')}
                                 <span className={`absolute -bottom-1 left-0 h-[2px] bg-red-600 transition-all duration-300 ${location.pathname === '/video' ? 'w-full' : 'w-0 group-hover/link:w-full'}`}></span>
                             </Link>
                             <Link to="/music" className={`transition-all duration-500 relative group/link ${location.pathname.startsWith('/music') ? (isDarkOverHero ? 'text-white' : 'text-foreground') : 'text-muted-foreground hover:text-red-500'}`}>
-                                Music
-                                <span className={`absolute -bottom-1 left-0 h-[2px] bg-red-600 transition-all duration-300 ${location.pathname.startsWith('/music') ? (isDarkOverHero ? 'text-white' : 'text-foreground') : 'w-0 group-hover/link:w-full'}`}></span>
+                                {t('nav.music')}
+                                <span className={`absolute -bottom-1 left-0 h-[2px] bg-red-600 transition-all duration-300 ${location.pathname.startsWith('/music') ? 'w-full' : 'w-0 group-hover/link:w-full'}`}></span>
                             </Link>
                         </div>
 
                         <div className={`h-6 w-[1px] mx-2 transition-colors duration-500 ${isDarkOverHero ? 'bg-white/10' : 'bg-border'}`}></div>
 
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-4">
+                            <LanguageSelector isDark={isDarkOverHero} />
                             <ModeToggle />
                             <Button
                                 asChild
@@ -87,9 +91,8 @@ const Navigation = () => {
                         </div>
                     </div>
 
-                    {/* Mobile Menu Toggle */}
+                    {/* Mobile Menu Toggle (Toggles only, Mode/Language hidden as requested) */}
                     <div className="md:hidden flex items-center gap-4 relative z-[110] transition-colors duration-500">
-                        <ModeToggle />
                         <Button
                             variant="ghost"
                             size="icon"
@@ -104,18 +107,25 @@ const Navigation = () => {
 
             {/* Mobile Sidebar Overlay */}
             <div
-                className={`md:hidden fixed inset-0 top-[4.5rem] bg-zinc-950/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center gap-8 transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 visible h-screen' : 'opacity-0 invisible h-0'
+                className={`md:hidden fixed inset-0 top-0 bg-background/95 backdrop-blur-3xl z-[90] flex flex-col items-center justify-center transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 visible h-screen' : 'opacity-0 invisible h-0'
                     }`}
             >
-                <div className="flex flex-col items-center gap-8 mb-20 animate-in slide-in-from-bottom-8 duration-500">
-                    <Link to="/" className="text-4xl font-black tracking-tighter text-white hover:text-red-600 transition-colors">HOME</Link>
-                    <Link to="/video" className="text-4xl font-black tracking-tighter text-white hover:text-red-600 transition-colors">VIDEOS</Link>
-                    <Link to="/music" className="text-4xl font-black tracking-tighter text-white hover:text-red-600 transition-colors">MUSIC</Link>
+                <div className="flex flex-col items-center gap-8 mb-12 animate-in slide-in-from-bottom-8 duration-500">
+                    <Link to="/" className="text-4xl font-black tracking-tighter text-foreground hover:text-red-600 transition-colors uppercase">{t('nav.home')}</Link>
+                    <Link to="/video" className="text-4xl font-black tracking-tighter text-foreground hover:text-red-600 transition-colors uppercase">{t('nav.videos')}</Link>
+                    <Link to="/music" className="text-4xl font-black tracking-tighter text-foreground hover:text-red-600 transition-colors uppercase">{t('nav.music')}</Link>
 
                     <div className="h-[2px] w-20 bg-red-600 rounded-full mt-4"></div>
                 </div>
 
-                <div className="w-full px-10 animate-in slide-in-from-bottom-12 delay-200 duration-500">
+                <div className="w-full px-10 flex flex-col items-center gap-8 animate-in slide-in-from-bottom-12 delay-200 duration-500">
+                    {/* Re-locating controls inside the sidebar for mobile accessibility but keeping header clean */}
+                    <div className="flex items-center gap-6 p-4 bg-accent/20 rounded-[2.5rem] border border-border/40">
+                         <LanguageSelector />
+                         <div className="w-px h-6 bg-border/40"></div>
+                         <ModeToggle />
+                    </div>
+
                     <Button
                         asChild
                         className="bg-red-600 hover:bg-red-700 text-white w-full py-10 rounded-3xl font-black text-xl flex items-center justify-center gap-3 transition-all active:scale-95 shadow-2xl shadow-red-600/30"

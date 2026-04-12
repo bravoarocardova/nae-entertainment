@@ -55,7 +55,9 @@ app.get('/api/songs', apiKeyAuth, (req: Request, res: Response) => {
     if (page !== undefined || limit !== undefined) {
         const pageNum = Math.max(1, parseInt(page as string) || 1);
         const limitNum = Math.min(50, Math.max(1, parseInt(limit as string) || 8));
-        getSongsPaginated(pageNum, limitNum, (err, result) => {
+        const searchTerm = req.query.search as string;
+
+        getSongsPaginated(pageNum, limitNum, searchTerm, (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(result);
         });

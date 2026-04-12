@@ -3,6 +3,8 @@ import axios from 'axios';
 import { PlayCircle, AlertCircle, Clock } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from 'react-i18next';
+import { ENDPOINTS, YOUTUBE_API_KEY, YOUTUBE_CHANNEL_ID } from '../config/api';
 
 interface YouTubeVideo {
     id: {
@@ -18,6 +20,7 @@ interface YouTubeVideo {
 }
 
 const Videos = () => {
+    const { t, i18n } = useTranslation();
     const [latestVideos, setLatestVideos] = useState<YouTubeVideo[]>([]);
     const [upcomingVideos, setUpcomingVideos] = useState<YouTubeVideo[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,30 +29,33 @@ const Videos = () => {
     useEffect(() => {
         const fetchVideos = async () => {
             setLoading(true);
-            const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
-            const CHANNEL_ID = import.meta.env.VITE_YOUTUBE_CHANNEL_ID;
 
-            if (!API_KEY || !CHANNEL_ID) {
-                setError("Konfigurasi YouTube API Key atau Channel ID belum ditemukan di file .env");
+            if (!YOUTUBE_API_KEY || !YOUTUBE_CHANNEL_ID) {
+                setError(t('videos.errorApi'));
                 setLoading(false);
                 return;
             }
 
             try {
-                // Fetch both Latest Videos and Upcoming Premieres in parallel
-                const baseUrl = `https://www.googleapis.com/youtube/v3/search`;
-                const commonParams = { key: API_KEY, channelId: CHANNEL_ID, part: 'snippet,id', order: 'date', type: 'video' };
+                // Fetch both Latest Videos and Upcoming Premieres in parallel using centralized endpoints
+                const commonParams = { 
+                    key: YOUTUBE_API_KEY, 
+                    channelId: YOUTUBE_CHANNEL_ID, 
+                    part: 'snippet,id', 
+                    order: 'date', 
+                    type: 'video' 
+                };
 
                 const [latestRes, upcomingRes] = await Promise.all([
-                    axios.get(baseUrl, { params: { ...commonParams, maxResults: 8 } }),
-                    axios.get(baseUrl, { params: { ...commonParams, maxResults: 4, eventType: 'upcoming' } })
+                    axios.get(ENDPOINTS.YOUTUBE_SEARCH, { params: { ...commonParams, maxResults: 8 } }),
+                    axios.get(ENDPOINTS.YOUTUBE_SEARCH, { params: { ...commonParams, maxResults: 4, eventType: 'upcoming' } })
                 ]);
 
                 // Filter out invalid items just to be safe
                 setLatestVideos(latestRes.data.items?.filter((item: any) => item.id.videoId) || []);
                 setUpcomingVideos(upcomingRes.data.items?.filter((item: any) => item.id.videoId) || []);
             } catch (err: any) {
-                const msg = err.response?.data?.error?.message || err.message || 'Terjadi kesalahan saat memuat video.';
+                const msg = err.response?.data?.error?.message || err.message || t('videos.errorLoad');
                 setError(msg);
             } finally {
                 setLoading(false);
@@ -57,20 +63,22 @@ const Videos = () => {
         };
 
         fetchVideos();
-    }, []);
+    }, [t]);
 
     // Format the date to something more readable
     const formatDate = (dateString: string) => {
         const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString('id-ID', options);
+        const locale = i18n.language.startsWith('id') ? 'id-ID' : 'en-US';
+        return new Date(dateString).toLocaleDateString(locale, options);
     };
 
     return (
-        <section id="videos" className="py-16 sm:py-24 px-4 min-h-screen">
+        <section id="videos" className="py-16 sm:py-24 px-4 min-h-screen bg-background">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16 sm:mb-20" data-aos="fade-up">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight px-2">OUR CONTENT</h2>
-                    <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">Check out our latest uploads directly from our YouTube Channel.</p>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 tracking-tight text-foreground inline-block bg-gradient-to-r from-foreground to-foreground/40 bg-clip-text text-transparent italic pe-2">{t('videos.title')}</h2>
+
+                    <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto px-4">{t('videos.subtitle')}</p>
                     <div className="h-1.5 w-16 sm:w-24 bg-red-600 mx-auto rounded-full mt-6"></div>
                 </div>
 
@@ -82,17 +90,15 @@ const Videos = () => {
                     )}
 
                     {error && (
-                        <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
+                        <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-6 rounded-2xl flex flex-col items-center justify-center text-center max-w-2xl mx-auto">
                             <AlertCircle className="w-10 h-10 mb-2" />
                             <p className="font-bold">{error}</p>
-                            {/* <p className="text-sm mt-2 text-red-400">Pastikan Anda telah mengisi <code>VITE_YOUTUBE_API_KEY</code> dan <code>VITE_YOUTUBE_CHANNEL_ID</code> di file <code>.env.local</code>.</p> */}
-                            {/* <p className="text-sm text-red-400 mt-1">Jika sudah diisi, mohon restart server (`npm run dev`) kembali.</p> */}
                         </div>
                     )}
 
                     {!loading && !error && upcomingVideos.length > 0 && (
                         <div className="mb-20">
-                            <h3 className="text-2xl sm:text-3xl font-bold mb-8 text-red-500 tracking-wider" data-aos="fade-right">UPCOMING PREMIERES</h3>
+                            <h3 className="text-2xl sm:text-3xl font-bold mb-8 text-red-500 tracking-wider" data-aos="fade-right">{t('videos.upcoming')}</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                                 {upcomingVideos.map((video, index) => (
                                     <a
@@ -115,7 +121,7 @@ const Videos = () => {
                                                 <div className="absolute top-3 left-3">
                                                     <Badge variant="destructive" className="font-bold flex items-center gap-1.5 px-3 py-1">
                                                         <Clock className="w-3 h-3" />
-                                                        <span>Premieres Soon</span>
+                                                        <span>{t('videos.premiering')}</span>
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -133,12 +139,12 @@ const Videos = () => {
                     )}
 
                     {!loading && !error && latestVideos.length === 0 && upcomingVideos.length === 0 && (
-                        <div className="text-center text-gray-500 py-10">Belum ada video yang dipublikasikan.</div>
+                        <div className="text-center text-muted-foreground py-10 font-bold uppercase tracking-widest">{t('videos.empty')}</div>
                     )}
 
                     {!loading && !error && latestVideos.length > 0 && (
                         <div>
-                            <h3 className="text-3xl font-bold mb-8 text-red-500 tracking-wider" data-aos="fade-right">LATEST VIDEOS</h3>
+                            <h3 className="text-3xl font-bold mb-8 text-red-500 tracking-wider" data-aos="fade-right">{t('videos.latest')}</h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                                 {latestVideos.map((video, index) => (
                                     <a

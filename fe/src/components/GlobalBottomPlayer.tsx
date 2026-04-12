@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Mic2, ListMusic, Volume, Volume1, Volume2, VolumeX, Maximize2, X, ChevronDown, ListPlus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useMusic } from '../contexts/MusicContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { apiClient } from '../config/api';
@@ -7,11 +8,12 @@ import { SecureImage, useSecureAsset } from './SecureAsset';
 
 
 export default function GlobalBottomPlayer() {
-    const { activeTrack: track, userQueue, clearQueue, removeFromQueue, nextTrack, prevTrack, toastMessage, autoplayToken } = useMusic();
+    const { t } = useTranslation();
+    const { activeTrack: track, userQueue, clearQueue, removeFromQueue, nextTrack, prevTrack, toastMessage, musicDatabase, autoplayToken } = useMusic();
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const lyricRefs = useRef<(HTMLParagraphElement | null)[]>([]);
-
+    
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -31,7 +33,7 @@ export default function GlobalBottomPlayer() {
     const [isDraggingTime, setIsDraggingTime] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showLyrics, setShowLyrics] = useState(false);
-    const [lyricsData, setLyricsData] = useState<{ time: number, text: string }[]>([{ time: 0, text: "Memuat lirik..." }]);
+    const [lyricsData, setLyricsData] = useState<{ time: number, text: string }[]>([{ time: 0, text: t('common.loading') }]);
 
     // Fetch secure audio URL
     const secureAudioSrc = useSecureAsset(track?.url);
@@ -211,10 +213,10 @@ export default function GlobalBottomPlayer() {
                     <div className="h-16 flex items-center justify-between px-6 shrink-0 z-20">
                         <button onClick={() => setIsExpanded(false)} className="flex items-center hover:bg-white/10 rounded-full transition-all bg-white/5 backdrop-blur-md group/close p-2 md:pr-6 md:gap-2">
                             <ChevronDown className="w-7 h-7 text-white group-hover/close:translate-y-0.5 transition-transform" />
-                            <span className="hidden md:block text-[10px] font-black uppercase tracking-[0.2em] text-white/70 mt-0.5">Sembunyikan</span>
+                            <span className="hidden md:block text-[10px] font-black uppercase tracking-[0.2em] text-white/70 mt-0.5">{t('common.hide')}</span>
                         </button>
                         <div className="flex flex-col items-center">
-                            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-white/40">Playing From</span>
+                            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-white/40">{t('player.playingFrom')}</span>
                             <span className="text-xs font-bold text-white truncate max-w-[150px]">{track.album}</span>
                         </div>
                         <button onClick={() => setShowQueue(!showQueue)} className={`p-2 rounded-full transition-all ${showQueue ? 'text-red-500 bg-red-500/10' : 'text-white bg-white/5'}`}>
@@ -231,7 +233,7 @@ export default function GlobalBottomPlayer() {
                             <div className={`w-full md:w-[35%] lg:w-[30%] flex flex-col px-8 py-6 items-center justify-start md:justify-center gap-6 md:gap-8 ${showLyrics ? 'hidden md:flex' : 'flex'}`}>
                                 <div className="w-full aspect-square max-w-[350px] rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative group shrink-0">
                                     <SecureImage path={track.thumbnail} alt="Artwork" className={`w-full h-full object-cover transition-transform duration-[2000ms] ${isPlaying ? 'scale-110 rotate-1' : 'scale-100'}`} />
-
+                                    
                                     {/* distributed corner Metadata stickers */}
                                     <div className="absolute inset-0 p-4 pointer-events-none transition-all duration-700">
                                         {/* Top Left: Genre */}
@@ -251,7 +253,7 @@ export default function GlobalBottomPlayer() {
                                         {/* Bottom Left: BPM */}
                                         {track.bpm && (
                                             <div className="absolute bottom-4 left-4 flex flex-col items-start gap-1 p-2 bg-black/40 backdrop-blur-xs rounded-lg border border-white/5 shadow-2xl scale-90 md:scale-100 origin-bottom-left">
-                                                <span className="text-[7px] font-black uppercase tracking-widest text-white/40">BPM</span>
+                                                <span className="text-[7px] font-black uppercase tracking-widest text-white/40">{t('player.bpm')}</span>
                                                 <p className="text-[9px] font-black text-white/90">{track.bpm}</p>
                                             </div>
                                         )}
@@ -259,7 +261,7 @@ export default function GlobalBottomPlayer() {
                                         {/* Bottom Right: Publisher */}
                                         {track.publisher && (
                                             <div className="absolute bottom-4 right-4 max-w-[120px] p-2 bg-black/40 backdrop-blur-xs rounded-lg border border-white/5 shadow-2xl scale-90 md:scale-100 origin-bottom-right">
-                                                <span className="text-[7px] font-black uppercase tracking-widest text-white/40 block text-right">Label</span>
+                                                <span className="text-[7px] font-black uppercase tracking-widest text-white/40 block text-right">{t('player.label')}</span>
                                                 <p className="text-[8px] font-black text-white px-2 py-1 md:text-white/90 uppercase tracking-tighter truncate text-right leading-none">{track.publisher}</p>
                                             </div>
                                         )}
@@ -323,7 +325,7 @@ export default function GlobalBottomPlayer() {
                                 {lyricsData.map((lyric, index) => {
                                     const isCurrent = index === currentLyricIndex;
                                     const isPassed = index < currentLyricIndex;
-
+                                    
                                     return (
                                         <p
                                             key={index}
@@ -352,7 +354,7 @@ export default function GlobalBottomPlayer() {
                             className={`flex items-center gap-3 px-8 py-4 rounded-full font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl ${showLyrics ? 'bg-white/10 text-white backdrop-blur-xl border border-white/10' : 'bg-red-600 text-white'}`}
                         >
                             <Mic2 className="w-5 h-5" />
-                            {showLyrics ? 'Tampilkan Kontrol' : 'Tampilkan Lirik'}
+                            {showLyrics ? t('player.showControls') : t('player.showLyrics')}
                         </button>
                     </div>
                 </div>
@@ -458,7 +460,7 @@ export default function GlobalBottomPlayer() {
                     <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
                         <div className="flex items-center gap-3">
                             <ListMusic className="w-5 h-5 text-red-500" />
-                            <h3 className="text-white font-black text-xs tracking-widest uppercase">Daftar Antrian</h3>
+                            <h3 className="text-white font-black text-xs tracking-widest uppercase">{t('player.queue')}</h3>
                         </div>
                         <div className="flex items-center gap-2">
                             {userQueue.length > 0 && (
@@ -466,7 +468,7 @@ export default function GlobalBottomPlayer() {
                                     onClick={clearQueue}
                                     className="text-[9px] font-black uppercase tracking-widest text-red-500 hover:text-white px-3 py-1.5 bg-red-500/10 hover:bg-red-600 rounded-full transition-all border border-red-500/20"
                                 >
-                                    Bersihkan
+                                    {t('player.clearQueue')}
                                 </button>
                             )}
                             <button onClick={() => setShowQueue(false)} className="text-white/40 hover:text-white p-2 hover:bg-white/10 rounded-full transition-all">
@@ -495,8 +497,8 @@ export default function GlobalBottomPlayer() {
                         ) : (
                             <div className="text-center py-12 opacity-30">
                                 <ListMusic className="w-12 h-12 mx-auto mb-3" />
-                                <p className="text-xs font-black uppercase tracking-widest">Antrian Kamu Kosong</p>
-                                <p className="text-[10px] mt-1">Tambahkan lagu untuk diputar selanjutnya</p>
+                                <p className="text-xs font-black uppercase tracking-widest">{t('player.emptyQueue')}</p>
+                                <p className="text-[10px] mt-1">{t('player.addNext')}</p>
                             </div>
                         )}
                     </div>
