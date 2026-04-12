@@ -19,8 +19,8 @@ interface MusicContextType {
     addToQueue: (track: SongData) => void;
     removeFromQueue: (index: number) => void;
     clearQueue: () => void;
-    nextTrack: (isShuffle: boolean) => void;
-    prevTrack: (isShuffle: boolean) => void;
+    nextTrack: (isShuffle: boolean) => Promise<void>;
+    prevTrack: (isShuffle: boolean) => Promise<void>;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -47,7 +47,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
                 setMusicDatabase(res.data.songs);
                 setTotalPages(res.data.totalPages);
             })
-            .catch(err => console.error('Error fetching songs:', err))
+            .catch(err => console.error('Error fetching paginated songs:', err))
             .finally(() => setIsLoadingMusic(false));
     }, [currentPage]);
 
@@ -73,32 +73,45 @@ export function MusicProvider({ children }: { children: ReactNode }) {
 
     const clearQueue = () => setUserQueue([]);
 
-    const nextTrack = (isShuffle: boolean) => {
+    const nextTrack = async (isShuffle: boolean) => {
         if (userQueue.length > 0) {
             const [next, ...rest] = userQueue;
             setUserQueue(rest);
             setActiveTrack(next);
-        } else if (activeTrack && musicDatabase.length > 0) {
-            const currentIdx = musicDatabase.findIndex(t => t.url === activeTrack.url);
+            bumpAutoplay();
+        } else if (activeTrack) {
             if (isShuffle) {
-                setActiveTrack(musicDatabase[Math.floor(Math.random() * musicDatabase.length)]);
-            } else {
+                // Best Practice: Fetch random song from server for infinite scalability
+                try {
+                    const res = await apiClient.get<SongData>('/api/songs/random');
+                    setActiveTrack(res.data);
+                } catch (err) {
+                    console.error('Shuffle failed:', err);
+                }
+            } else if (musicDatabase.length > 0) {
+                const currentIdx = musicDatabase.findIndex(t => t.url === activeTrack.url);
                 setActiveTrack(musicDatabase[(currentIdx + 1) % musicDatabase.length]);
             }
+            bumpAutoplay();
         }
-        bumpAutoplay();
     };
 
-    const prevTrack = (isShuffle: boolean) => {
-        if (activeTrack && musicDatabase.length > 0) {
-            const currentIdx = musicDatabase.findIndex(t => t.url === activeTrack.url);
+    const prevTrack = async (isShuffle: boolean) => {
+        if (activeTrack) {
             if (isShuffle) {
-                setActiveTrack(musicDatabase[Math.floor(Math.random() * musicDatabase.length)]);
-            } else {
+                // Same as next for shuffle
+                try {
+                    const res = await apiClient.get<SongData>('/api/songs/random');
+                    setActiveTrack(res.data);
+                } catch (err) {
+                    console.error('Shuffle failed:', err);
+                }
+            } else if (musicDatabase.length > 0) {
+                const currentIdx = musicDatabase.findIndex(t => t.url === activeTrack.url);
                 setActiveTrack(musicDatabase[(currentIdx - 1 + musicDatabase.length) % musicDatabase.length]);
             }
+            bumpAutoplay();
         }
-        bumpAutoplay();
     };
 
     return (

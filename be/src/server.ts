@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDb, getAllSongs, getSongsPaginated } from './db.js';
+import { initDb, getAllSongs, getSongsPaginated, getRandomSong } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,6 +46,14 @@ app.use('/thumbnails', apiKeyAuth, express.static(path.join(__dirname, '../publi
 
 
 // ─── Protected Routes ─────────────────────────────────────────────────────────
+
+// GET /api/songs/random    → pick one random track (scalable shuffle)
+app.get('/api/songs/random', apiKeyAuth, (req: Request, res: Response) => {
+    getRandomSong((err, song) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(song);
+    });
+});
 
 // GET /api/songs          → all songs (relative path metadata)
 // GET /api/songs?page=1&limit=8 → paginated response

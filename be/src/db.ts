@@ -346,3 +346,17 @@ export function getSongsPaginated(page: number, limit: number, search: string | 
         });
     });
 }
+
+export function getRandomSong(callback: (err: Error | null, song: SongData | null) => void) {
+    db.get("SELECT * FROM songs ORDER BY RANDOM() LIMIT 1", (err, row: SongData) => {
+        if (err) return callback(err, null);
+        if (!row) return callback(null, null);
+        const song = {
+            ...row,
+            url: row.url ? `/tracks/${row.url}` : '',
+            lyric: row.lyric ? `/lyrics/${row.lyric}` : '',
+            thumbnail: row.thumbnail ? (row.thumbnail.startsWith('http') ? row.thumbnail : `/thumbnails/${row.thumbnail}`) : ''
+        };
+        callback(null, song);
+    });
+}

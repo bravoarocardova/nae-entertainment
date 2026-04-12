@@ -9,11 +9,11 @@ import { SecureImage, useSecureAsset } from './SecureAsset';
 
 export default function GlobalBottomPlayer() {
     const { t } = useTranslation();
-    const { activeTrack: track, userQueue, clearQueue, removeFromQueue, nextTrack, prevTrack, toastMessage, musicDatabase, autoplayToken } = useMusic();
+    const { activeTrack: track, userQueue, clearQueue, removeFromQueue, nextTrack, prevTrack, toastMessage, autoplayToken } = useMusic();
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const lyricRefs = useRef<(HTMLParagraphElement | null)[]>([]);
-    
+
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -233,7 +233,7 @@ export default function GlobalBottomPlayer() {
                             <div className={`w-full md:w-[35%] lg:w-[30%] flex flex-col px-8 py-6 items-center justify-start md:justify-center gap-6 md:gap-8 ${showLyrics ? 'hidden md:flex' : 'flex'}`}>
                                 <div className="w-full aspect-square max-w-[350px] rounded-2xl overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative group shrink-0">
                                     <SecureImage path={track.thumbnail} alt="Artwork" className={`w-full h-full object-cover transition-transform duration-[2000ms] ${isPlaying ? 'scale-110 rotate-1' : 'scale-100'}`} />
-                                    
+
                                     {/* distributed corner Metadata stickers */}
                                     <div className="absolute inset-0 p-4 pointer-events-none transition-all duration-700">
                                         {/* Top Left: Genre */}
@@ -325,7 +325,7 @@ export default function GlobalBottomPlayer() {
                                 {lyricsData.map((lyric, index) => {
                                     const isCurrent = index === currentLyricIndex;
                                     const isPassed = index < currentLyricIndex;
-                                    
+
                                     return (
                                         <p
                                             key={index}
@@ -428,6 +428,9 @@ export default function GlobalBottomPlayer() {
 
                     <div className="hidden lg:flex items-center gap-4">
                         <button onClick={() => setIsExpanded(true)} className={`transition-all ${isExpanded ? 'text-red-500' : 'text-white/40 hover:text-white'}`}><Mic2 className="w-5 h-5" /></button>
+                        <button onClick={() => setShowQueue(!showQueue)} className={`p-2 rounded-full transition-all ${showQueue ? 'text-red-500 bg-red-500/10' : 'text-white/40 hover:text-white'}`}>
+                            <ListMusic className="w-6 h-6" />
+                        </button>
                         <div className="flex items-center gap-3 w-32 group/vol relative h-6">
                             <button
                                 onClick={toggleMute}
@@ -456,11 +459,11 @@ export default function GlobalBottomPlayer() {
 
             {/* Pop-up Antrian (Queue) - Works in both modes */}
             {showQueue && (
-                <div className={`absolute ${isExpanded ? 'bottom-32 right-8 md:right-12' : 'bottom-28 right-4'} w-[90vw] md:w-96 bg-zinc-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden z-[1500] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300`}>
-                    <div className="flex items-center justify-between p-5 border-b border-white/5 bg-white/5">
+                <div className={`absolute ${isExpanded ? 'bottom-32 right-8 md:right-12' : 'bottom-28 right-4'} w-[90vw] md:w-96 bg-card/95 backdrop-blur-3xl border border-border rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden z-[1500] animate-in slide-in-from-bottom-4 zoom-in-95 duration-300`}>
+                    <div className="flex items-center justify-between p-5 border-b border-border bg-secondary/30">
                         <div className="flex items-center gap-3">
                             <ListMusic className="w-5 h-5 text-red-500" />
-                            <h3 className="text-white font-black text-xs tracking-widest uppercase">{t('player.queue')}</h3>
+                            <h3 className="text-foreground font-black text-xs tracking-widest uppercase">{t('player.queue')}</h3>
                         </div>
                         <div className="flex items-center gap-2">
                             {userQueue.length > 0 && (
@@ -471,7 +474,7 @@ export default function GlobalBottomPlayer() {
                                     {t('player.clearQueue')}
                                 </button>
                             )}
-                            <button onClick={() => setShowQueue(false)} className="text-white/40 hover:text-white p-2 hover:bg-white/10 rounded-full transition-all">
+                            <button onClick={() => setShowQueue(false)} className="text-muted-foreground hover:text-foreground p-2 hover:bg-accent rounded-full transition-all">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -480,15 +483,17 @@ export default function GlobalBottomPlayer() {
                         {userQueue.length > 0 ? (
                             <div className="space-y-2">
                                 {userQueue.map((qTrack, idx) => (
-                                    <div key={idx} className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all group/item cursor-pointer">
+                                    <div key={idx} className="flex items-center justify-between p-3 bg-secondary/20 hover:bg-accent rounded-xl transition-all group/item cursor-pointer">
                                         <div className="flex items-center gap-4 min-w-0">
-                                            <SecureImage path={qTrack.thumbnail} alt="cover" className="w-12 h-12 object-cover rounded-lg shadow-lg group-hover/item:scale-105 transition-transform" />
+                                            <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden shadow-lg border border-border/20 group-hover/item:scale-105 transition-transform">
+                                                <SecureImage path={qTrack.thumbnail} alt="cover" className="w-full h-full object-cover" />
+                                            </div>
                                             <div className="min-w-0">
-                                                <h4 className="text-white font-bold text-sm truncate group-hover/item:text-red-500 transition-colors">{qTrack.title}</h4>
-                                                <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mt-1">{qTrack.artist}</p>
+                                                <h4 className="text-foreground font-bold text-sm truncate group-hover/item:text-red-500 transition-colors">{qTrack.title}</h4>
+                                                <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest mt-1">{qTrack.artist}</p>
                                             </div>
                                         </div>
-                                        <button onClick={(e) => { e.stopPropagation(); removeFromQueue(idx); }} className="text-white/40 hover:text-red-500 p-2 opacity-100 md:opacity-0 md:group-hover/item:opacity-100 transition-all shrink-0">
+                                        <button onClick={(e) => { e.stopPropagation(); removeFromQueue(idx); }} className="text-muted-foreground hover:text-red-500 p-2 opacity-100 md:opacity-0 md:group-hover/item:opacity-100 transition-all shrink-0">
                                             <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
                                         </button>
                                     </div>
@@ -496,9 +501,10 @@ export default function GlobalBottomPlayer() {
                             </div>
                         ) : (
                             <div className="text-center py-12 opacity-30">
-                                <ListMusic className="w-12 h-12 mx-auto mb-3" />
-                                <p className="text-xs font-black uppercase tracking-widest">{t('player.emptyQueue')}</p>
-                                <p className="text-[10px] mt-1">{t('player.addNext')}</p>
+
+                                <ListMusic className="w-12 h-12 mx-auto mb-3 text-foreground" />
+                                <p className="text-xs font-black uppercase tracking-widest text-foreground">{t('player.emptyQueue')}</p>
+                                <p className="text-[10px] mt-1 text-muted-foreground">{t('player.addNext')}</p>
                             </div>
                         )}
                     </div>
