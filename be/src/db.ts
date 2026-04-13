@@ -6,7 +6,7 @@ import { musicDatabase } from './seeder.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbPath = path.resolve(__dirname, '../music.db');
+const dbPath = path.resolve(__dirname, '../data/music.db');
 const db = new (sqlite3.verbose()).Database(dbPath);
 
 export interface SongData {
