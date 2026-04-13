@@ -1,50 +1,49 @@
-# NAE Entertainment - Landing Page
+# NAE Entertainment - Frontend
 
-This is the official landing page for NAE Entertainment, a digital entertainment company. This project is a static website built with HTML and Tailwind CSS, and it is containerized using Docker for easy deployment and portability.
+![NAE Entertainment Banner](../assets/banner.png)
 
-## Prerequisites
+## 🎨 Overview
+The frontend of NAE Entertainment is a high-performance, responsive React application built with **Vite** and **Tailwind CSS**. It serves as the primary interface for users to interact with music and video content.
 
-Before you begin, ensure you have [Docker](https://www.docker.com/get-started) installed on your local machine.
+## 🚀 Key Features
+- **Modern UI**: Crafted with Tailwind CSS and Radix UI components.
+- **Micro-animations**: Smooth interactions using `AOS` and CSS transitions.
+- **Localization**: Multi-language support (English/Indonesian) via `react-i18next`.
+- **Dynamic Routing**: Seamless navigation using `react-router-dom`.
 
-## Running the Project with Docker
+## 🛠️ Tech Stack
+- **Framework**: React 18+
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS 4.0
+- **Icons**: Lucide React
+- **HTTP Client**: Axios
 
-Follow these steps to build the Docker image and run the container.
+## 🚦 Getting Started
 
-### 1. Build the Docker Image
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
 
-Open your terminal or command prompt, navigate to the project's root directory (where the `Dockerfile` is located), and run the following command to build the Docker image. This command packages the website into an image named `nae-entertainment-web`.
+### Installation
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Configure `.env.local` (Copy from `.env.example`):
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
+## 🏗️ Build for Production
+To generate a production-ready bundle:
 ```bash
-docker build -t nae-entertainment-web .
+npm run build
 ```
+The output will be in the `dist/` directory.
 
-### 2. Run the Docker Container
-
-Once the image has been built successfully, run the following command to start a container from the image:
-
-```bash
-docker run -d -p 8080:80 nae-entertainment-web
-```
-
-**Command Breakdown:**
-- `-d`: Runs the container in detached mode (in the background).
-- `-p 8080:80`: Maps port 8080 on your host machine to port 80 inside the container. You can change `8080` to any other available port on your machine if needed.
-- `nae-entertainment-web`: The name of the image to run.
-
-### 3. Access the Website
-
-After the container is running, you can access the website by opening your web browser and navigating to:
-
-[http://localhost:8080](http://localhost:8080)
-
-## Stopping the Container
-
-To find the container ID and stop the running container, you can use the following commands:
-
-```bash
-# List all running containers to find the CONTAINER ID
-docker ps
-
-# Stop the container using its ID
-docker stop <CONTAINER_ID>
-```
+---
+Part of the [NAE Entertainment](..) project.

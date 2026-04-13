@@ -48,7 +48,7 @@ app.use('/thumbnails', express.static(path.join(__dirname, '../public/thumbnails
 // ─── Protected Routes ─────────────────────────────────────────────────────────
 
 // GET /api/songs/random    → pick one random track (scalable shuffle)
-app.get('/api/songs/random', apiKeyAuth, (req: Request, res: Response) => {
+app.get('/api/songs/random', (req: Request, res: Response) => {
     getRandomSong((err, song) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(song);
@@ -57,7 +57,7 @@ app.get('/api/songs/random', apiKeyAuth, (req: Request, res: Response) => {
 
 // GET /api/songs          → all songs (relative path metadata)
 // GET /api/songs?page=1&limit=8 → paginated response
-app.get('/api/songs', apiKeyAuth, (req: Request, res: Response) => {
+app.get('/api/songs', (req: Request, res: Response) => {
     const { page, limit } = req.query;
 
     if (page !== undefined || limit !== undefined) {
