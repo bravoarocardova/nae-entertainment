@@ -1,0 +1,14 @@
+node_modules
+npm-debug.log*
+.git
+.vscode
+.env
+music.db
+*.db
+*.sqlite
+public/lyrics
+public/tracks
+public/thumbnails
+README.md
+Dockerfile
+.dockerignore

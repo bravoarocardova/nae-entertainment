@@ -12,7 +12,23 @@ const PORT = process.env.PORT || 4000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const API_KEY = process.env.API_KEY;
 
-app.use(cors());
+const allowedOrigins = ['http://localhost:5173','http://localhost:4173'];
+
+app.use(cors(
+    {
+        origin: (origin, callback) => {
+            // Izinkan jika origin ada dalam daftar atau tidak ada (misal: request dari server ke server)
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                console.log("Blocked by CORS:", origin);
+                callback(new Error('Origin tidak diizinkan oleh CORS'));
+            }
+        },
+        allowedHeaders: ["Content-Type","x-api-key"],
+        methods: ["GET", "POST", "PUT", "DELETE"],
+    }
+));
 app.use(express.json());
 
 // Init SQLite DB
